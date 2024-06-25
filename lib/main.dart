@@ -1,16 +1,31 @@
+import 'package:beamer/beamer.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:momentum/model/image/image_model.dart';
-import 'package:momentum/providers/navigation/bottom_navigation_provider.dart';
-import 'package:momentum/providers/provider.dart';
-import 'package:momentum/screens/achieve/achieve_screen.dart';
-import 'package:momentum/screens/bottom/bottom_screen.dart';
-import 'package:momentum/screens/home/home_screen.dart';
-import 'package:momentum/screens/splash/splash_screen.dart';
-import 'package:momentum/widgets/navigation_bar_widget.dart';
-import 'package:momentum/widgets/navigation_body_widget.dart';
-import 'package:momentum/screens/record/record_screen.dart';
-import 'package:provider/provider.dart';
+import 'package:momentum/screens/auth/auth_screen.dart';
+import 'package:momentum/screens/router/locations.dart';
+import 'package:momentum/screens/start/splash_screen.dart';
+
+// 비머 전역 선언
+final _routerDelegate = BeamerDelegate(
+  // 비머 가드
+  guards: [
+    BeamGuard(
+      pathBlueprints: ['/'],
+      check: (context, location) {
+        return true;
+      },
+      showPage: BeamPage(
+        child: AuthScreen(),
+      ),
+    ),
+  ],
+
+  locationBuilder: BeamerLocationBuilder(
+    beamLocations: [
+      MainLocation(),
+    ],
+  ),
+);
 
 void main() async {
   await initializeDateFormatting();
@@ -51,38 +66,19 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       debugShowCheckedModeBanner: false, //디버그 배너 해제
+      routeInformationParser: BeamerParser(),
+      routerDelegate: _routerDelegate,
       title: "momentum",
       theme: ThemeData(
+        fontFamily: 'NotoSans',
         primaryColor: Colors.white,
         scaffoldBackgroundColor: Colors.white,
         appBarTheme: AppBarTheme(
           foregroundColor: Colors.black,
           backgroundColor: Colors.white,
         ),
-      ),
-      // home: DefaultTabController(
-      //   length: 4,
-      //   child: Scaffold( // 화면 구성 및 구조에 관한 것
-      //     backgroundColor: Colors.white,
-      //     body: TabBarView(
-      //       children: [
-      //         HomeScreen(),
-      //         RecordScreen(),
-      //         AchieveScreen(),
-      //       ],
-      //     ),
-      //     bottomNavigationBar: BottomScreen(),
-      //   ),
-      // ),
-      home: MultiProvider(
-        // provider 사용
-        providers: AppProviders.providers,
-        child: Scaffold(
-          body: NavigationBodyWidget(), // App 위젯의 바디 부분 위젯
-          bottomNavigationBar: NavigationBarWidget(), // App 위젯의 바텀 네비게이션 바 부분 위젯
-        ), // 화면에 보여지는 부분
       ),
     );
   }
