@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
 
-class TitleCurrentDayWidget extends StatelessWidget {
-  final DateTime currentTime = DateTime.now();
+class TitleCurrentDayWidget extends StatefulWidget {
+  final int year;
+  final int month;
 
-  TitleCurrentDayWidget({super.key});
+  const TitleCurrentDayWidget({super.key, required this.year, required this.month});
+
+  @override
+  State<TitleCurrentDayWidget> createState() => _TitleCurrentDayWidgetState();
+}
+
+class _TitleCurrentDayWidgetState extends State<TitleCurrentDayWidget> {
 
   @override
   Widget build(BuildContext context) {
@@ -12,13 +19,13 @@ class TitleCurrentDayWidget extends StatelessWidget {
       children: [
         Row(
           children: [
-            Text('${currentTime.year}년 ',
+            Text('${widget.year}년 ',
               style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.w400
               ),
             ),
-            Text('${currentTime.month}월',
+            Text('${widget.month}월',
               style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.w700

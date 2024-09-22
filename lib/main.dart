@@ -23,6 +23,7 @@ final _routerDelegate = BeamerDelegate(
   locationBuilder: BeamerLocationBuilder(
     beamLocations: [
       MainLocation(),
+      AddTodoLocation(),
     ],
   ),
 );
@@ -67,10 +68,11 @@ class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-      debugShowCheckedModeBanner: false, //디버그 배너 해제
+      debugShowCheckedModeBanner: false,
+      //디버그 배너 해제
       routeInformationParser: BeamerParser(),
       routerDelegate: _routerDelegate,
-      title: "momentum",
+      title: "mogrow",
       theme: ThemeData(
         fontFamily: 'NotoSans',
         primaryColor: Colors.white,

@@ -1,3 +1,4 @@
+import 'package:beamer/beamer.dart';
 import 'package:flutter/material.dart';
 import 'package:momentum/screens/achieve/achieve_screen.dart';
 import 'package:momentum/screens/home/home_screen.dart';
@@ -29,14 +30,16 @@ class _MainScreenState extends State<MainScreen> {
         selectedLabelStyle: TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.bold,
-          color: Colors.deepPurpleAccent,
+          color: Color(0xFF0066FA),
         ),
         unselectedLabelStyle: TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.bold,
-          color: Colors.black38,
+          color: Color(0xFF667086),
         ),
-        elevation: 10,
+        selectedItemColor: Color(0xFF0066FA),
+        unselectedItemColor: Color(0xFF667086),
+        elevation: 4,
         currentIndex: _bottomSelectedIndex,
         type: BottomNavigationBarType.fixed,
         items: [
@@ -76,6 +79,18 @@ class _MainScreenState extends State<MainScreen> {
             _bottomSelectedIndex = index;
           });
         },
+      ),
+      // floatingActionButton
+      floatingActionButton: MaterialButton(
+        onPressed: () => context.beamToNamed('addTodo'),
+        shape: CircleBorder(),
+        height: 48,
+        color: Color(0xFF0066FA),
+        child: Icon(
+          Icons.add,
+          color: Color(0xFFFFFFFF),
+          size: 28,
+        ),
       ),
     );
   }
