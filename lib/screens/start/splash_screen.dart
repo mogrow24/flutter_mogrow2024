@@ -13,7 +13,7 @@ class SplashScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             ExtendedImage.asset(
-              'assets/images/momentum.png',
+              'assets/images/mogrow.png',
               width: 80,
               height: 80,
               fit: BoxFit.contain,

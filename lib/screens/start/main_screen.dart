@@ -1,8 +1,8 @@
 import 'package:beamer/beamer.dart';
 import 'package:flutter/material.dart';
-import 'package:momentum/screens/achieve/achieve_screen.dart';
-import 'package:momentum/screens/home/home_screen.dart';
-import 'package:momentum/screens/record/record_screen.dart';
+import 'package:mogrow/screens/achieve/achieve_screen.dart';
+import 'package:mogrow/screens/home/home_screen.dart';
+import 'package:mogrow/screens/record/record_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:momentum/screens/home/widget/add_todolist_widget.dart';
-import 'package:momentum/screens/home/widget/daily_message_widget.dart';
-import 'package:momentum/screens/home/widget/home_calender_widget.dart';
-import 'package:momentum/screens/home/widget/home_todolist_widget.dart';
-import 'package:momentum/screens/home/widget/title_current_day_widget.dart';
+import 'package:mogrow/screens/home/widget/add_todolist_widget.dart';
+import 'package:mogrow/screens/home/widget/daily_message_widget.dart';
+import 'package:mogrow/screens/home/widget/home_calender_widget.dart';
+import 'package:mogrow/screens/home/widget/home_todolist_widget.dart';
+import 'package:mogrow/screens/home/widget/title_current_day_widget.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -13,7 +13,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final ValueNotifier<DateTime> _focusedDayNotifier = ValueNotifier(DateTime.now());
+  final ValueNotifier<DateTime> _focusedDayNotifier =
+      ValueNotifier(DateTime.now());
 
   late DateTime _selectedDay;
 
@@ -78,9 +79,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // 날짜가 변경될 때 콜백으로 처리
   void _onDateSelected(DateTime selectedDay) {
-    print(_hasData(DateTime(selectedDay.year, selectedDay.month, selectedDay.day)));
+    print(_hasData(
+        DateTime(selectedDay.year, selectedDay.month, selectedDay.day)));
     setState(() {
-      _selectedDay = DateTime(selectedDay.year, selectedDay.month, selectedDay.day);
+      _selectedDay =
+          DateTime(selectedDay.year, selectedDay.month, selectedDay.day);
     });
   }
 
@@ -100,7 +103,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     ValueListenableBuilder<DateTime>(
                       valueListenable: _focusedDayNotifier,
                       builder: (context, value, _) {
-                        return TitleCurrentDayWidget( // 타이틀 현재 날짜
+                        return TitleCurrentDayWidget(
+                          // 타이틀 현재 날짜
                           year: value.year,
                           month: value.month,
                         );
@@ -138,7 +142,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 _focusedDayNotifier.value = focusedDay;
               },
               onDateSelected: _onDateSelected,
-              markedDates: {for (var date in data!.keys) date: _hasData(date),},
+              markedDates: {
+                for (var date in data!.keys) date: _hasData(date),
+              },
             ), // 캘린더
           ),
           Positioned(
