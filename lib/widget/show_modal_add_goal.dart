@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:momentum/widget/show_modal_new_goal.dart';
-import 'package:momentum/widget/show_modal_select_goal.dart';
+import 'package:mogrow/widget/show_modal_new_goal.dart';
+import 'package:mogrow/widget/show_modal_select_goal.dart';
 
 class ShowModalAddGoal extends StatefulWidget {
   const ShowModalAddGoal({super.key});
@@ -10,7 +10,6 @@ class ShowModalAddGoal extends StatefulWidget {
 }
 
 class _ShowModalAddGoalState extends State<ShowModalAddGoal> {
-
   void _showSelectGoalModal() {
     Navigator.of(context).pop();
     showModalBottomSheet(
@@ -129,16 +128,17 @@ class _ShowModalAddGoalState extends State<ShowModalAddGoal> {
 class _FullScreenPageRoute extends PageRouteBuilder {
   _FullScreenPageRoute()
       : super(
-    pageBuilder: (context, animation, secondaryAnimation) {
-      return FullScreenModal();
-    },
-    transitionsBuilder: (context, animation, secondaryAnimation, child) {
-      const begin = Offset(0.0, 1.0);
-      const end = Offset.zero;
-      const curve = Curves.easeInOut;
-      var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-      var offsetAnimation = animation.drive(tween);
-      return SlideTransition(position: offsetAnimation, child: child);
-    },
-  );
+          pageBuilder: (context, animation, secondaryAnimation) {
+            return FullScreenModal();
+          },
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            const begin = Offset(0.0, 1.0);
+            const end = Offset.zero;
+            const curve = Curves.easeInOut;
+            var tween =
+                Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+            var offsetAnimation = animation.drive(tween);
+            return SlideTransition(position: offsetAnimation, child: child);
+          },
+        );
 }

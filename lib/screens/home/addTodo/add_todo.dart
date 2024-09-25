@@ -1,10 +1,9 @@
 import 'package:beamer/beamer.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:momentum/screens/home/addTodo/model/goal.dart';
-import 'package:momentum/widget/show_modal_select_goal.dart';
-import 'package:momentum/widget/show_modal_add_goal.dart';
-import 'package:momentum/widget/show_modal_select_repeat.dart';
+import 'package:mogrow/screens/home/addTodo/model/goal.dart';
+import 'package:mogrow/widget/show_modal_select_goal.dart';
+import 'package:mogrow/widget/show_modal_select_repeat.dart';
 
 class AddTodo extends StatefulWidget {
   const AddTodo({super.key});

@@ -1,10 +1,9 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:momentum/widget/show_modal_description.dart';
-import 'package:momentum/widget/show_modal_select_goalColor.dart';
+import 'package:mogrow/widget/show_modal_description.dart';
+import 'package:mogrow/widget/show_modal_select_goalColor.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class FullScreenModal extends StatefulWidget {
@@ -378,7 +377,9 @@ class _FullScreenModalState extends State<FullScreenModal> {
       context: context,
       isScrollControlled: true,
       builder: (BuildContext context) {
-        return ShowModalDescription(initDesc: desc,);
+        return ShowModalDescription(
+          initDesc: desc,
+        );
       },
     );
 
