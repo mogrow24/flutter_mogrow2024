@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:momentum/screens/home/addTodo/model/goal.dart';
 import 'package:momentum/widget/show_modal_select_goal.dart';
-import 'package:momentum/widget/show_modal_add_goal.dart';
 import 'package:momentum/widget/show_modal_select_repeat.dart';
 
 class AddTodo extends StatefulWidget {
@@ -23,7 +22,7 @@ class _AddTodoState extends State<AddTodo> {
   // 목표 관련 상태 값
   int? selectedGoalIndex = 0;
   String? goalName = '없음';
-  String? goalColor = 'core.png';
+  String? goalColor = 'core';
 
   // 반복 관련 상태 값
   int? selectedRepeatIndex = 0;
@@ -258,7 +257,7 @@ class _AddTodoState extends State<AddTodo> {
                                           MainAxisAlignment.spaceBetween,
                                       children: [
                                         Image.asset(
-                                          'assets/icons/gemstones/$goalColor',
+                                          'assets/icons/gemstones/$goalColor.png',
                                           width: 24,
                                           height: 24,
                                         ),

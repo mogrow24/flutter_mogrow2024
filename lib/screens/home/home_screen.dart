@@ -13,7 +13,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final ValueNotifier<DateTime> _focusedDayNotifier = ValueNotifier(DateTime.now());
+  final ValueNotifier<DateTime> _focusedDayNotifier =
+      ValueNotifier(DateTime.now());
 
   late DateTime _selectedDay;
 
@@ -40,24 +41,36 @@ class _HomeScreenState extends State<HomeScreen> {
         {
           'title': '보석 아이콘 제작',
           'gemstone': 'sunstone',
+          'repeat': null,
           'status': false,
+          'isCompleted': false,
+          'isContinue': false,
         },
         {
           'title': '엣지 케이스 그리기',
           'gemstone': 'sphene',
+          'repeat': '매월 마지막 주 화요일',
           'status': false,
+          'isCompleted': false,
+          'isContinue': false,
         },
       ],
       DateTime(2024, 9, 15): [
         {
           'title': '디자인에 플로우 적용 후 놓친 것 다시 하기',
           'gemstone': 'aquamarine',
+          'repeat': "매주 화요일",
           'status': false,
+          'isCompleted': false,
+          'isContinue': false,
         },
         {
           'title': '디자인 시스템 구축',
           'gemstone': 'amethyst',
+          'repeat': null,
           'status': true,
+          'isCompleted': false,
+          'isContinue': false,
         },
       ],
     };
@@ -78,9 +91,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // 날짜가 변경될 때 콜백으로 처리
   void _onDateSelected(DateTime selectedDay) {
-    print(_hasData(DateTime(selectedDay.year, selectedDay.month, selectedDay.day)));
+    print(_hasData(
+        DateTime(selectedDay.year, selectedDay.month, selectedDay.day)));
     setState(() {
-      _selectedDay = DateTime(selectedDay.year, selectedDay.month, selectedDay.day);
+      _selectedDay =
+          DateTime(selectedDay.year, selectedDay.month, selectedDay.day);
     });
   }
 
@@ -100,7 +115,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     ValueListenableBuilder<DateTime>(
                       valueListenable: _focusedDayNotifier,
                       builder: (context, value, _) {
-                        return TitleCurrentDayWidget( // 타이틀 현재 날짜
+                        return TitleCurrentDayWidget(
+                          // 타이틀 현재 날짜
                           year: value.year,
                           month: value.month,
                         );
@@ -138,7 +154,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 _focusedDayNotifier.value = focusedDay;
               },
               onDateSelected: _onDateSelected,
-              markedDates: {for (var date in data!.keys) date: _hasData(date),},
+              markedDates: {
+                for (var date in data!.keys) date: _hasData(date),
+              },
             ), // 캘린더
           ),
           Positioned(

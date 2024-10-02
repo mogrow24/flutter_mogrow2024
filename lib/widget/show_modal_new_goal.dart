@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -7,14 +6,14 @@ import 'package:momentum/widget/show_modal_description.dart';
 import 'package:momentum/widget/show_modal_select_goalColor.dart';
 import 'package:table_calendar/table_calendar.dart';
 
-class FullScreenModal extends StatefulWidget {
-  const FullScreenModal({super.key});
+class ShowModalNewGoal extends StatefulWidget {
+  const ShowModalNewGoal({super.key});
 
   @override
-  State<FullScreenModal> createState() => _FullScreenModalState();
+  State<ShowModalNewGoal> createState() => _ShowModalNewGoalState();
 }
 
-class _FullScreenModalState extends State<FullScreenModal> {
+class _ShowModalNewGoalState extends State<ShowModalNewGoal> {
   // title 관련
   final TextEditingController _controllerTitle = TextEditingController();
   final TextEditingController _controllerSubtitle = TextEditingController();
@@ -378,7 +377,9 @@ class _FullScreenModalState extends State<FullScreenModal> {
       context: context,
       isScrollControlled: true,
       builder: (BuildContext context) {
-        return ShowModalDescription(initDesc: desc,);
+        return ShowModalDescription(
+          initDesc: desc,
+        );
       },
     );
 

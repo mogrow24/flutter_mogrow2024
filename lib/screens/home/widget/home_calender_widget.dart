@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_advanced_calendar/flutter_advanced_calendar.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class HomeCalendarWidget extends StatefulWidget {
@@ -7,12 +6,11 @@ class HomeCalendarWidget extends StatefulWidget {
   final Function(DateTime) onDateSelected;
   final Map<DateTime, bool> markedDates;
 
-  const HomeCalendarWidget({
-      required this.onPageChanged,
+  const HomeCalendarWidget(
+      {required this.onPageChanged,
       super.key,
       required this.onDateSelected,
-      required this.markedDates
-  });
+      required this.markedDates});
 
   @override
   State<HomeCalendarWidget> createState() => _HomeCalendarState();
@@ -131,7 +129,9 @@ class _HomeCalendarState extends State<HomeCalendarWidget> {
               ),
               calendarBuilders: CalendarBuilders(
                 markerBuilder: (context, date, events) {
-                  if (widget.markedDates[DateTime(date.year, date.month, date.day)] == true) {
+                  if (widget.markedDates[
+                          DateTime(date.year, date.month, date.day)] ==
+                      true) {
                     return Opacity(
                       opacity: 0.4,
                       child: Container(
