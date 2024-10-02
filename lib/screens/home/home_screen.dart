@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:momentum/screens/home/widget/add_todolist_widget.dart';
-import 'package:momentum/screens/home/widget/daily_message_widget.dart';
-import 'package:momentum/screens/home/widget/home_calender_widget.dart';
-import 'package:momentum/screens/home/widget/home_todolist_widget.dart';
-import 'package:momentum/screens/home/widget/title_current_day_widget.dart';
+import 'package:mogrow/screens/home/widget/add_todolist_widget.dart';
+import 'package:mogrow/screens/home/widget/daily_message_widget.dart';
+import 'package:mogrow/screens/home/widget/home_calender_widget.dart';
+import 'package:mogrow/screens/home/widget/home_todolist_widget.dart';
+import 'package:mogrow/screens/home/widget/title_current_day_widget.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});

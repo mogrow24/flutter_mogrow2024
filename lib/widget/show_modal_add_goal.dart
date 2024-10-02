@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:momentum/widget/show_modal_new_goal.dart';
-import 'package:momentum/widget/show_modal_select_goal.dart';
+import 'package:mogrow/widget/show_modal_new_goal.dart';
+import 'package:mogrow/widget/show_modal_select_goal.dart';
 
 class ShowModalAddGoal extends StatefulWidget {
   const ShowModalAddGoal({super.key});

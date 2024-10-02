@@ -1,9 +1,9 @@
 import 'package:beamer/beamer.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:momentum/screens/auth/auth_screen.dart';
-import 'package:momentum/screens/router/locations.dart';
-import 'package:momentum/screens/start/splash_screen.dart';
+import 'package:mogrow/screens/auth/auth_screen.dart';
+import 'package:mogrow/screens/router/locations.dart';
+import 'package:mogrow/screens/start/splash_screen.dart';
 
 // 비머 전역 선언
 final _routerDelegate = BeamerDelegate(

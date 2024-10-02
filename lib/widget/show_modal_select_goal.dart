@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:momentum/screens/home/addTodo/model/goal.dart';
-import 'package:momentum/widget/show_modal_add_goal.dart';
+import 'package:mogrow/screens/home/addTodo/model/goal.dart';
+import 'package:mogrow/widget/show_modal_add_goal.dart';
 
 class ShowModal extends StatefulWidget {
   final int? initialCheckedIndex;

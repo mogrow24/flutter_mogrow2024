@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:momentum/widget/show_modal_description.dart';
-import 'package:momentum/widget/show_modal_select_goalColor.dart';
+import 'package:mogrow/widget/show_modal_description.dart';
+import 'package:mogrow/widget/show_modal_select_goalColor.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class ShowModalNewGoal extends StatefulWidget {
