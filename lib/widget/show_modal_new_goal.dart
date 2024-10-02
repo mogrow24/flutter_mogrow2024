@@ -6,14 +6,14 @@ import 'package:mogrow/widget/show_modal_description.dart';
 import 'package:mogrow/widget/show_modal_select_goalColor.dart';
 import 'package:table_calendar/table_calendar.dart';
 
-class FullScreenModal extends StatefulWidget {
-  const FullScreenModal({super.key});
+class ShowModalNewGoal extends StatefulWidget {
+  const ShowModalNewGoal({super.key});
 
   @override
-  State<FullScreenModal> createState() => _FullScreenModalState();
+  State<ShowModalNewGoal> createState() => _ShowModalNewGoalState();
 }
 
-class _FullScreenModalState extends State<FullScreenModal> {
+class _ShowModalNewGoalState extends State<ShowModalNewGoal> {
   // title 관련
   final TextEditingController _controllerTitle = TextEditingController();
   final TextEditingController _controllerSubtitle = TextEditingController();

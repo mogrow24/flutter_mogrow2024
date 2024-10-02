@@ -129,7 +129,7 @@ class _FullScreenPageRoute extends PageRouteBuilder {
   _FullScreenPageRoute()
       : super(
           pageBuilder: (context, animation, secondaryAnimation) {
-            return FullScreenModal();
+            return ShowModalNewGoal();
           },
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             const begin = Offset(0.0, 1.0);

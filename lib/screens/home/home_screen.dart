@@ -41,24 +41,36 @@ class _HomeScreenState extends State<HomeScreen> {
         {
           'title': '보석 아이콘 제작',
           'gemstone': 'sunstone',
+          'repeat': null,
           'status': false,
+          'isCompleted': false,
+          'isContinue': false,
         },
         {
           'title': '엣지 케이스 그리기',
           'gemstone': 'sphene',
+          'repeat': '매월 마지막 주 화요일',
           'status': false,
+          'isCompleted': false,
+          'isContinue': false,
         },
       ],
       DateTime(2024, 9, 15): [
         {
           'title': '디자인에 플로우 적용 후 놓친 것 다시 하기',
           'gemstone': 'aquamarine',
+          'repeat': "매주 화요일",
           'status': false,
+          'isCompleted': false,
+          'isContinue': false,
         },
         {
           'title': '디자인 시스템 구축',
           'gemstone': 'amethyst',
+          'repeat': null,
           'status': true,
+          'isCompleted': false,
+          'isContinue': false,
         },
       ],
     };
