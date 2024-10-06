@@ -22,8 +22,8 @@ final _routerDelegate = BeamerDelegate(
 
   locationBuilder: BeamerLocationBuilder(
     beamLocations: [
-      MainLocation(),
-      AddTodoLocation(),
+      MainLocation(), // 메인 페이지
+      AddTodoLocation(), // 새로운 할일 페이지
     ],
   ),
 );
