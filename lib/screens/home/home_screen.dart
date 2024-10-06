@@ -18,6 +18,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   late DateTime _selectedDay;
 
+  // 텍스트 필드 포커스
+  bool _isAddTodoFocused = false;
+
   // 투두리스트 관련
   Map<DateTime, List<Map<String, dynamic>>>? data;
 
@@ -99,74 +102,106 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  // 텍스트 필드가 활성화 되면
+  void _onFocusChanged(bool hasFocus) {
+    setState(() {
+      _isAddTodoFocused = hasFocus; // Update the focus state
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Stack(
-        children: [
-          Column(
+    return Stack(
+      children: [
+        if (_isAddTodoFocused)
+          GestureDetector(
+            onTap: () {
+              FocusScope.of(context).unfocus();
+            },
+            child: Container(
+              height: MediaQuery.of(context).padding.top,
+              color: Colors.black.withOpacity(0.5),
+            ),
+          ),
+        SafeArea(
+          child: Stack(
             children: [
-              Padding(
-                padding: const EdgeInsets.only(
-                    top: 0, right: 4, bottom: 0, left: 16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    ValueListenableBuilder<DateTime>(
-                      valueListenable: _focusedDayNotifier,
-                      builder: (context, value, _) {
-                        return TitleCurrentDayWidget(
-                          // 타이틀 현재 날짜
-                          year: value.year,
-                          month: value.month,
-                        );
-                      },
-                    ),
-                    DailyMessageWidget(), // 명언
-                  ],
-                ),
-              ),
-              SizedBox(
-                height: 12,
-              ),
-              Container(
-                decoration: BoxDecoration(
-                  border: Border(
-                    bottom: BorderSide(
-                      color: Color(0xffECECF0),
-                      width: 1,
+              Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(
+                        top: 0, right: 4, bottom: 0, left: 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        ValueListenableBuilder<DateTime>(
+                          valueListenable: _focusedDayNotifier,
+                          builder: (context, value, _) {
+                            return TitleCurrentDayWidget(
+                              // 타이틀 현재 날짜
+                              year: value.year,
+                              month: value.month,
+                            );
+                          },
+                        ),
+                        DailyMessageWidget(), // 명언
+                      ],
                     ),
                   ),
+                  SizedBox(
+                    height: 12,
+                  ),
+                  Container(
+                    decoration: BoxDecoration(
+                      border: Border(
+                        bottom: BorderSide(
+                          color: Color(0xffECECF0),
+                          width: 1,
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    height: 115,
+                  ),
+                  HomeTodolistWidget(todoList: data?[_selectedDay] ?? []),
+                ],
+              ),
+              Positioned(
+                top: 125, // 달력을 원하는 위치에 배치
+                left: 0,
+                right: 0,
+                child: HomeCalendarWidget(
+                  onPageChanged: (focusedDay) {
+                    _focusedDayNotifier.value = focusedDay;
+                  },
+                  onDateSelected: _onDateSelected,
+                  markedDates: {
+                    for (var date in data!.keys) date: _hasData(date),
+                  },
+                ), // 캘린더
+              ),
+              if (_isAddTodoFocused)
+                GestureDetector(
+                  onTap: () {
+                    FocusScope.of(context).unfocus();
+                  },
+                  child: Container(
+                    color: Colors.black.withOpacity(0.5),
+                  ),
+                ),
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: MediaQuery.of(context).padding.bottom,
+                child: AddTodolistWidget(
+                  onFocusChanged: _onFocusChanged,
                 ),
               ),
-              SizedBox(
-                height: 115,
-              ),
-              HomeTodolistWidget(todoList: data?[_selectedDay] ?? []),
             ],
           ),
-          Positioned(
-            top: 125, // 달력을 원하는 위치에 배치
-            left: 0,
-            right: 0,
-            child: HomeCalendarWidget(
-              onPageChanged: (focusedDay) {
-                _focusedDayNotifier.value = focusedDay;
-              },
-              onDateSelected: _onDateSelected,
-              markedDates: {
-                for (var date in data!.keys) date: _hasData(date),
-              },
-            ), // 캘린더
-          ),
-          Positioned(
-            left: 0,
-            right: 80,
-            bottom: MediaQuery.of(context).padding.bottom,
-            child: AddTodolistWidget(),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

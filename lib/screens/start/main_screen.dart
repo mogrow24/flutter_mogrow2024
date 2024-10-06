@@ -1,4 +1,3 @@
-import 'package:beamer/beamer.dart';
 import 'package:flutter/material.dart';
 import 'package:mogrow/screens/achieve/achieve_screen.dart';
 import 'package:mogrow/screens/home/home_screen.dart';
@@ -81,17 +80,17 @@ class _MainScreenState extends State<MainScreen> {
         },
       ),
       // floatingActionButton
-      floatingActionButton: MaterialButton(
-        onPressed: () => context.beamToNamed('addTodo'),
-        shape: CircleBorder(),
-        height: 48,
-        color: Color(0xFF0066FA),
-        child: Icon(
-          Icons.add,
-          color: Color(0xFFFFFFFF),
-          size: 28,
-        ),
-      ),
+      // floatingActionButton: MaterialButton(
+      //   onPressed: () => context.beamToNamed('addTodo'),
+      //   shape: CircleBorder(),
+      //   height: 48,
+      //   color: Color(0xFF0066FA),
+      //   child: Icon(
+      //     Icons.add,
+      //     color: Color(0xFFFFFFFF),
+      //     size: 28,
+      //   ),
+      // ),
     );
   }
 }
