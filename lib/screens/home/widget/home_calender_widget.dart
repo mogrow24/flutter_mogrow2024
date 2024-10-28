@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:mogrow/database/database.dart';
+import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class HomeCalendarWidget extends StatefulWidget {
   final Function(DateTime) onPageChanged;
   final Function(DateTime) onDateSelected;
-  final Map<DateTime, bool> markedDates;
+  // final Map<DateTime, bool> markedDates;
 
-  const HomeCalendarWidget(
-      {required this.onPageChanged,
-      super.key,
-      required this.onDateSelected,
-      required this.markedDates});
+  const HomeCalendarWidget({
+    required this.onPageChanged,
+    super.key,
+    required this.onDateSelected,
+  });
 
   @override
   State<HomeCalendarWidget> createState() => _HomeCalendarState();
@@ -20,6 +22,9 @@ class _HomeCalendarState extends State<HomeCalendarWidget> {
   CalendarFormat _calendarFormat = CalendarFormat.week;
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
+
+  // 해당 날짜에 데이터가 있는지
+  Map<DateTime, bool> dateHasDataMap = {};
 
   @override
   void initState() {
@@ -31,9 +36,43 @@ class _HomeCalendarState extends State<HomeCalendarWidget> {
     _focusedDay = _selectedDay!;
   }
 
-  // double _height = 300.0;
-  // static const double _weekHeight = 120.0;
-  // static const double _monthHeight = 380.0;
+  late Database database;
+  late List<Todo> _todosFuture;
+  @override
+  void didChangeDependencies() async {
+    super.didChangeDependencies();
+    database = Provider.of<Database>(context);
+    _todosFuture = await database.todoDao.getAllTodos();
+
+    final groupedTodoList = groupTodosByDate(_todosFuture);
+
+    setState(() {
+      dateHasDataMap = {
+        for (var date in groupedTodoList.keys)
+          date: _hasData(date, groupedTodoList)
+      };
+    });
+  }
+
+  // 해당 날짜에 todoList 가 있는지
+  bool _hasData(DateTime date, Map<DateTime, List<Todo>> groupedTodoList) {
+    return groupedTodoList[date]?.isNotEmpty ??
+        false; // 데이터가 있으면 true, 없으면 false
+  }
+
+  // Todo 목록을 DateTime에 따라 그룹화
+  Map<DateTime, List<Todo>> groupTodosByDate(List<Todo> todos) {
+    Map<DateTime, List<Todo>> groupedTodos = {};
+
+    for (var todo in todos) {
+      if (!groupedTodos.containsKey(todo.date)) {
+        groupedTodos[todo.date!] = [];
+      }
+      groupedTodos[todo.date]!.add(todo);
+    }
+
+    return groupedTodos;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -129,7 +168,7 @@ class _HomeCalendarState extends State<HomeCalendarWidget> {
               ),
               calendarBuilders: CalendarBuilders(
                 markerBuilder: (context, date, events) {
-                  if (widget.markedDates[
+                  if (dateHasDataMap[
                           DateTime(date.year, date.month, date.day)] ==
                       true) {
                     return Opacity(
@@ -145,7 +184,7 @@ class _HomeCalendarState extends State<HomeCalendarWidget> {
                       ),
                     );
                   }
-                  return SizedBox(); // Return an empty widget if no marker
+                  return SizedBox();
                 },
               ),
               availableGestures: AvailableGestures.horizontalSwipe,
@@ -203,7 +242,7 @@ class _HomeCalendarState extends State<HomeCalendarWidget> {
                       color: Colors.grey.withOpacity(0.1),
                       spreadRadius: 0,
                       blurRadius: 6,
-                      offset: Offset(0, 8), // changes position of shadow
+                      offset: Offset(0, 8),
                     ),
                   ],
                 ),

@@ -1,5 +1,8 @@
 import 'package:beamer/beamer.dart';
+import 'package:drift/drift.dart';
 import 'package:flutter/material.dart';
+import 'package:mogrow/database/database.dart';
+import 'package:provider/provider.dart';
 
 class AddTodolistWidget extends StatefulWidget {
   final ValueChanged<bool> onFocusChanged;
@@ -57,6 +60,8 @@ class _AddTodolistWidgetState extends State<AddTodolistWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final database = Provider.of<Database>(context);
+
     return Stack(
       children: [
         if (_isFocused)
@@ -106,8 +111,35 @@ class _AddTodolistWidgetState extends State<AddTodolistWidget> {
               _isFocused
                   ? IconButton(
                       padding: EdgeInsets.all(12),
-                      onPressed: () {
+                      onPressed: () async {
                         if (_hasText) {
+                          String title = _textController.text;
+                          DateTime now = DateTime.now();
+                          DateTime specificDay = DateTime(
+                            now.year,
+                            now.month,
+                            now.day,
+                          );
+                          print(specificDay);
+
+                          if (title.isNotEmpty) {
+                            await database.todoDao.insertTodo(
+                              TodosCompanion(
+                                title: Value(title),
+                                gemstone: Value('core'),
+                                date: Value(specificDay),
+                              ),
+                            );
+
+                            // 텍스트 필드를 초기화하여 새로운 메모를 입력하기 위해 준비
+                            _textController.clear();
+
+                            // 화면을 다시 그리도록 setState 호출하여 메모 목록을 갱신
+                            setState(() {
+                              // todos = dbHelper.getTodos();
+                            });
+                          }
+
                           FocusScope.of(context).unfocus();
                         }
                       },
