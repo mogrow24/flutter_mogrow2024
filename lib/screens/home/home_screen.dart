@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:mogrow/screens/home/widget/add_todolist_widget.dart';
 import 'package:mogrow/screens/home/widget/daily_message_widget.dart';
 import 'package:mogrow/screens/home/widget/home_calender_widget.dart';
@@ -24,6 +27,14 @@ class _HomeScreenState extends State<HomeScreen> {
   // 투두리스트 관련
   Map<DateTime, List<Map<String, dynamic>>>? data;
 
+  // 명언 관련
+  List<dynamic>? messages;
+  String message = '';
+  String author = '';
+
+  // 달력 위치
+  double topPosition = 0.0;
+
   @override
   void dispose() {
     _focusedDayNotifier.dispose();
@@ -40,7 +51,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     // 데이터
     data = {
-      DateTime(2024, 9, 20): [
+      DateTime(2024, 10, 20): [
         {
           'title': '보석 아이콘 제작',
           'gemstone': 'sunstone',
@@ -58,7 +69,7 @@ class _HomeScreenState extends State<HomeScreen> {
           'isContinue': false,
         },
       ],
-      DateTime(2024, 9, 15): [
+      DateTime(2024, 10, 15): [
         {
           'title': '디자인에 플로우 적용 후 놓친 것 다시 하기',
           'gemstone': 'aquamarine',
@@ -77,6 +88,8 @@ class _HomeScreenState extends State<HomeScreen> {
         },
       ],
     };
+
+    loadJsonData(); // 명언 데이터 호출
   }
 
   // api 데이터 호출 후 해당 날짜에 데이터가 있는지 확인해서 true/false
@@ -107,6 +120,61 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       _isAddTodoFocused = hasFocus; // Update the focus state
     });
+  }
+
+  // 명언
+  Future<void> loadJsonData() async {
+    try {
+      // assets 폴더에 저장된 data.json 파일을 읽어옴
+      String jsonString =
+          await rootBundle.loadString('assets/datas/dailyMessage.json');
+      List<dynamic> jsonData = jsonDecode(jsonString);
+
+      if (jsonData.isNotEmpty) {
+        // JSON 데이터에서 message와 person을 가져와 setState로 업데이트
+        setState(() {
+          messages = jsonData;
+          int monthIndex = getMonthlyMessageIndex(messages!.length);
+          message = messages![monthIndex]['message'] ?? 'No message available';
+          author = messages![monthIndex]['author'] ?? 'Unknown';
+
+          // 메세지 길이에 따라 달력위치 조절
+          if (message.length >= 114) {
+            topPosition = 160.0;
+          } else if (message.length >= 75 && message.length < 114) {
+            topPosition = 140.0;
+          } else if (message.length >= 39 && message.length < 75) {
+            topPosition = 120.0;
+          } else {
+            topPosition = 100.0;
+          }
+        });
+      } else {
+        setState(() {
+          message = 'No messages found';
+          author = 'Unknown';
+          topPosition = 100.0;
+        });
+      }
+    } catch (e) {
+      // 오류 처리 (예: 파일이 없거나 JSON 파싱 오류)
+      print('Error loading JSON: $e');
+      setState(() {
+        message = 'Error loading message';
+        author = '';
+        topPosition = 100.0;
+      });
+    }
+  }
+
+  // 현재 달을 기반으로 메시지 인덱스 생성
+  int getMonthlyMessageIndex(int messageCount) {
+    DateTime now = DateTime.now();
+    int currentYear = now.year; // 현재 연도
+    int currentMonth = now.month; // 현재 달
+    int currentDay = now.day; // 현재 일
+
+    return (currentYear + currentMonth + currentDay) % messageCount;
   }
 
   @override
@@ -144,13 +212,16 @@ class _HomeScreenState extends State<HomeScreen> {
                             );
                           },
                         ),
-                        DailyMessageWidget(), // 명언
+                        DailyMessageWidget(
+                          message: message,
+                          author: author,
+                        ), // 명언
                       ],
                     ),
                   ),
-                  SizedBox(
-                    height: 12,
-                  ),
+                  // SizedBox(
+                  //   height: 12,
+                  // ),
                   Container(
                     decoration: BoxDecoration(
                       border: Border(
@@ -168,7 +239,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
               Positioned(
-                top: 125, // 달력을 원하는 위치에 배치
+                top: topPosition, // 달력을 원하는 위치에 배치
                 left: 0,
                 right: 0,
                 child: HomeCalendarWidget(
@@ -176,9 +247,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     _focusedDayNotifier.value = focusedDay;
                   },
                   onDateSelected: _onDateSelected,
-                  markedDates: {
-                    for (var date in data!.keys) date: _hasData(date),
-                  },
+                  // markedDates: {
+                  //   for (var date in data!.keys) date: _hasData(date),
+                  // },
                 ), // 캘린더
               ),
               if (_isAddTodoFocused)
