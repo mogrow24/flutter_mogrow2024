@@ -1,6 +1,6 @@
 import 'package:beamer/beamer.dart';
 import 'package:flutter/material.dart';
-import 'package:mogrow/screens/home/addTodo/add_todo.dart';
+import 'package:mogrow/screens/home/widget/add_todo.dart';
 import 'package:mogrow/screens/start/main_screen.dart';
 
 class MainLocation extends BeamLocation {
