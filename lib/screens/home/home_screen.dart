@@ -2,11 +2,14 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:mogrow/providers/record_list.dart';
+import 'package:mogrow/providers/todo_list.dart';
 import 'package:mogrow/screens/home/widget/add_todolist_widget.dart';
 import 'package:mogrow/screens/home/widget/daily_message_widget.dart';
 import 'package:mogrow/screens/home/widget/home_calender_widget.dart';
 import 'package:mogrow/screens/home/widget/home_todolist_widget.dart';
 import 'package:mogrow/screens/home/widget/title_current_day_widget.dart';
+import 'package:provider/provider.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -19,13 +22,10 @@ class _HomeScreenState extends State<HomeScreen> {
   final ValueNotifier<DateTime> _focusedDayNotifier =
       ValueNotifier(DateTime.now());
 
-  late DateTime _selectedDay;
+  // late DateTime _selectedDay;
 
   // 텍스트 필드 포커스
   bool _isAddTodoFocused = false;
-
-  // 투두리스트 관련
-  Map<DateTime, List<Map<String, dynamic>>>? data;
 
   // 명언 관련
   List<dynamic>? messages;
@@ -46,79 +46,40 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
 
     // 초기화면 오늘 날짜
-    DateTime today = DateTime.now();
-    _selectedDay = DateTime(today.year, today.month, today.day);
-
-    // 데이터
-    data = {
-      DateTime(2024, 10, 20): [
-        {
-          'title': '보석 아이콘 제작',
-          'gemstone': 'sunstone',
-          'repeat': null,
-          'status': false,
-          'isCompleted': false,
-          'isContinue': false,
-        },
-        {
-          'title': '엣지 케이스 그리기',
-          'gemstone': 'sphene',
-          'repeat': '매월 마지막 주 화요일',
-          'status': false,
-          'isCompleted': false,
-          'isContinue': false,
-        },
-      ],
-      DateTime(2024, 10, 15): [
-        {
-          'title': '디자인에 플로우 적용 후 놓친 것 다시 하기',
-          'gemstone': 'aquamarine',
-          'repeat': "매주 화요일",
-          'status': false,
-          'isCompleted': false,
-          'isContinue': false,
-        },
-        {
-          'title': '디자인 시스템 구축',
-          'gemstone': 'amethyst',
-          'repeat': null,
-          'status': true,
-          'isCompleted': false,
-          'isContinue': false,
-        },
-      ],
-    };
+    // DateTime today = DateTime.now();
+    // _selectedDay = DateTime(today.year, today.month, today.day);
 
     loadJsonData(); // 명언 데이터 호출
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final provider = Provider.of<TodoListProvider>(context, listen: false);
+      provider.year = _focusedDayNotifier.value.year;
+      provider.month = _focusedDayNotifier.value.month;
+      await provider.fetchTodos();
+      // print("초기 데이터 호출!!
+    });
   }
 
-  // api 데이터 호출 후 해당 날짜에 데이터가 있는지 확인해서 true/false
-  bool _hasData(DateTime date) {
-    return data?[date]?.isNotEmpty ?? false; // 데이터가 있으면 true, 없으면 false
-  }
-
-  // api 호출 시 사용
-  Future<String> getTodoList() async {
-    // setState(() {
-    //   data!.addAll(item);
-    // });
-    return "success";
+  // 생명주기와 종속성 관리하는 함수
+  // 종속성이 변경될 때 다시 호출. (provider)
+  @override
+  void didChangeDependencies() async {
+    super.didChangeDependencies();
+    // final provider = Provider.of<TodoListProvider>(context, listen: false);
+    // await provider.fetchTodos();
   }
 
   // 날짜가 변경될 때 콜백으로 처리
   void _onDateSelected(DateTime selectedDay) {
-    print(_hasData(
-        DateTime(selectedDay.year, selectedDay.month, selectedDay.day)));
-    setState(() {
-      _selectedDay =
-          DateTime(selectedDay.year, selectedDay.month, selectedDay.day);
-    });
+    // print(selectedDay);
+    // context.read<TodoListProvider>().setSeletedDay(
+    //     DateTime(selectedDay.year, selectedDay.month, selectedDay.day));
   }
 
   // 텍스트 필드가 활성화 되면
   void _onFocusChanged(bool hasFocus) {
     setState(() {
-      _isAddTodoFocused = hasFocus; // Update the focus state
+      _isAddTodoFocused = hasFocus;
     });
   }
 
@@ -137,13 +98,13 @@ class _HomeScreenState extends State<HomeScreen> {
           int monthIndex = getMonthlyMessageIndex(messages!.length);
           message = messages![monthIndex]['message'] ?? 'No message available';
           author = messages![monthIndex]['author'] ?? 'Unknown';
-
+          // print(message.length);
           // 메세지 길이에 따라 달력위치 조절
           if (message.length >= 114) {
             topPosition = 160.0;
           } else if (message.length >= 75 && message.length < 114) {
             topPosition = 140.0;
-          } else if (message.length >= 39 && message.length < 75) {
+          } else if (message.length > 37 && message.length < 75) {
             topPosition = 120.0;
           } else {
             topPosition = 100.0;
@@ -179,6 +140,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final todoProvider = Provider.of<TodoListProvider>(context, listen: false);
+    final recordProvider =
+        Provider.of<RecordListProvider>(context, listen: false);
+
+    final selectedDay = context.watch<TodoListProvider>().selectedDay;
+
+    // 명언 저장
+    context.read<TodoListProvider>().updateMessage(message, author);
+
     return Stack(
       children: [
         if (_isAddTodoFocused)
@@ -233,9 +203,11 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                   SizedBox(
-                    height: 115,
+                    height: MediaQuery.of(context).size.height * 0.11,
                   ),
-                  HomeTodolistWidget(todoList: data?[_selectedDay] ?? []),
+                  HomeTodolistWidget(
+                    selectedDay: selectedDay,
+                  ),
                 ],
               ),
               Positioned(
@@ -243,7 +215,30 @@ class _HomeScreenState extends State<HomeScreen> {
                 left: 0,
                 right: 0,
                 child: HomeCalendarWidget(
-                  onPageChanged: (focusedDay) {
+                  onPageChanged: (focusedDay) async {
+                    final DateTime baseDate =
+                        DateTime(todoProvider.year, todoProvider.month);
+
+                    // +- 3
+                    final DateTime startDate =
+                        DateTime(baseDate.year, baseDate.month - 6);
+                    final DateTime endDate =
+                        DateTime(baseDate.year, baseDate.month + 12);
+
+                    if ((focusedDay.isAtSameMomentAs(startDate) ||
+                            focusedDay.isAfter(startDate)) &&
+                        (focusedDay.isBefore(endDate) ||
+                            focusedDay.isAtSameMomentAs(endDate))) {
+                    } else {
+                      todoProvider.year = focusedDay.year;
+                      todoProvider.month = focusedDay.month;
+                      recordProvider.year = focusedDay.year;
+                      recordProvider.month = focusedDay.month;
+
+                      await todoProvider.fetchTodos();
+                      await recordProvider.fetchRecords();
+                    }
+
                     _focusedDayNotifier.value = focusedDay;
                   },
                   onDateSelected: _onDateSelected,
@@ -267,10 +262,25 @@ class _HomeScreenState extends State<HomeScreen> {
                 bottom: MediaQuery.of(context).padding.bottom,
                 child: AddTodolistWidget(
                   onFocusChanged: _onFocusChanged,
+                  selectedDay: selectedDay,
                 ),
               ),
             ],
           ),
+        ),
+
+        // 로딩 오버레이
+        Consumer<TodoListProvider>(
+          builder: (context, provider, child) {
+            return provider.isLoading
+                ? Container(
+                    color: Colors.black.withOpacity(0.3),
+                    child: const Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  )
+                : const SizedBox.shrink();
+          },
         ),
       ],
     );
