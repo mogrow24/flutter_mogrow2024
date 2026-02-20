@@ -1,0 +1,2 @@
+/Users/hooni/Desktop/mogrow/android/app/.cxx/RelWithDebInfo/4f4850t3/armeabi-v7a/CMakeFiles/edit_cache.dir
+/Users/hooni/Desktop/mogrow/android/app/.cxx/RelWithDebInfo/4f4850t3/armeabi-v7a/CMakeFiles/rebuild_cache.dir

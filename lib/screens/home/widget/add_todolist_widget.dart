@@ -1,13 +1,15 @@
-import 'package:beamer/beamer.dart';
-import 'package:drift/drift.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mogrow/database/database.dart';
+import 'package:mogrow/providers/todo_list.dart';
 import 'package:provider/provider.dart';
 
 class AddTodolistWidget extends StatefulWidget {
   final ValueChanged<bool> onFocusChanged;
+  final DateTime selectedDay;
 
-  const AddTodolistWidget({super.key, required this.onFocusChanged});
+  const AddTodolistWidget(
+      {super.key, required this.onFocusChanged, required this.selectedDay});
 
   @override
   State<AddTodolistWidget> createState() => _AddTodolistWidgetState();
@@ -19,48 +21,55 @@ class _AddTodolistWidgetState extends State<AddTodolistWidget> {
   bool _isFocused = false;
   bool _hasText = false;
 
+  // 버튼
+  final GlobalKey _iconButtonKey = GlobalKey();
+
   @override
   void initState() {
     super.initState();
-    _focusNode.addListener(_handleFocusChange);
-    _textController.addListener(_handleTextChange);
   }
 
-  void _handleFocusChange() {
-    if (_focusNode.hasFocus) {
-      // TextField가 포커스를 얻었을 때 수행할 작업
-      print('TextField has focus');
-    } else {
-      // TextField가 포커스를 잃었을 때 수행할 작업
-      print('TextField lost focus');
-    }
-
+  // 텍스트 필드 포커스 감지
+  void handleFocusChange() {
     widget.onFocusChanged(_focusNode.hasFocus);
-
     setState(() {
       _isFocused = _focusNode.hasFocus;
     });
   }
 
-  void _handleTextChange() {
-    print(_textController.text.isNotEmpty);
+  // 텍스트 입력 감지
+  void handleTextChange() {
     setState(() {
-      _hasText = _textController.text.isNotEmpty; // 텍스트가 있는지 확인
+      _hasText = _textController.text.isNotEmpty;
     });
+  }
+
+  // 포커스를 잃을 때 리스너 제거
+  void removeListeners() {
+    _focusNode.removeListener(handleFocusChange);
+    _textController.removeListener(handleTextChange);
   }
 
   @override
   void dispose() {
-    _focusNode.removeListener(_handleFocusChange);
     _focusNode.dispose();
-    _textController.removeListener(_handleTextChange);
     _textController.dispose();
     super.dispose();
   }
 
+  bool _isTapOnIconButton(PointerEvent event) {
+    // IconButton의 RenderBox 가져오기
+    final RenderBox renderBox =
+        _iconButtonKey.currentContext!.findRenderObject() as RenderBox;
+    final Offset position = renderBox.localToGlobal(Offset.zero);
+    final Rect buttonRect = position & renderBox.size;
+
+    return buttonRect.contains(event.position);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final database = Provider.of<Database>(context);
+    final provider = Provider.of<TodoListProvider>(context, listen: false);
 
     return Stack(
       children: [
@@ -72,36 +81,55 @@ class _AddTodolistWidgetState extends State<AddTodolistWidget> {
           padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
           child: Row(
             children: [
-              Container(
-                height: 42,
-                width: MediaQuery.of(context).size.width * 0.73,
-                decoration: BoxDecoration(
-                  color: Color(0xFFECECF0),
-                  border: Border.all(
-                    color: Color(0xFFE2E2EA),
-                    width: 1,
-                  ),
-                  borderRadius: BorderRadius.circular(35),
-                ),
-                child: TextField(
-                  controller: _textController,
-                  focusNode: _focusNode,
-                  onTapOutside: (event) {
-                    if (_isFocused) {
-                    } else {
-                      FocusManager.instance.primaryFocus?.unfocus();
-                    }
-                  },
-                  decoration: InputDecoration(
-                    hintText: '할 일을 추가해 보세요.',
-                    hintStyle: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w400,
-                      color: Color(0xFF8892A6),
+              Expanded(
+                child: Container(
+                  height: 42,
+                  // width: MediaQuery.of(context).size.width * 0.73,
+                  decoration: BoxDecoration(
+                    color: Color(0xFFECECF0),
+                    border: Border.all(
+                      color: Color(0xFFE2E2EA),
+                      width: 1,
                     ),
-                    border: InputBorder.none,
-                    contentPadding: EdgeInsets.only(
-                        left: 15, bottom: 10), // Adjust padding as needed
+                    borderRadius: BorderRadius.circular(35),
+                  ),
+                  child: TextField(
+                    controller: _textController,
+                    focusNode: _focusNode,
+                    onTapOutside: (event) {
+                      // print("포커스 해제!");
+                      if (_isTapOnIconButton(event)) {
+                        return;
+                      }
+                      _focusNode.unfocus();
+                      removeListeners();
+                      widget.onFocusChanged(!_focusNode.hasFocus);
+                      setState(() {
+                        _isFocused = !_focusNode.hasFocus;
+                      });
+                    },
+                    onTap: () {
+                      // print("텍스트 필드 포커스!");
+                      // 포커스가 잡혔을 때 리스너를 추가
+                      if (!_focusNode.hasFocus) {
+                        _focusNode.addListener(handleFocusChange);
+                        _textController.addListener(handleTextChange);
+                      }
+                    },
+                    onChanged: (value) {
+                      // print(value);
+                    },
+                    decoration: InputDecoration(
+                      hintText: '할 일을 추가해 보세요.',
+                      hintStyle: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w400,
+                        color: Color(0xFF8892A6),
+                      ),
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.only(
+                          left: 15, bottom: 10), // Adjust padding as needed
+                    ),
                   ),
                 ),
               ),
@@ -110,39 +138,49 @@ class _AddTodolistWidgetState extends State<AddTodolistWidget> {
               ),
               _isFocused
                   ? IconButton(
+                      key: _iconButtonKey,
                       padding: EdgeInsets.all(12),
-                      onPressed: () async {
-                        if (_hasText) {
-                          String title = _textController.text;
-                          DateTime now = DateTime.now();
-                          DateTime specificDay = DateTime(
-                            now.year,
-                            now.month,
-                            now.day,
-                          );
-                          print(specificDay);
+                      onPressed: _hasText
+                          ? () async {
+                              if (_hasText) {
+                                String title = _textController.text;
+                                // print(widget.selectedDay);
 
-                          if (title.isNotEmpty) {
-                            await database.todoDao.insertTodo(
-                              TodosCompanion(
-                                title: Value(title),
-                                gemstone: Value('core'),
-                                date: Value(specificDay),
-                              ),
-                            );
+                                // 아이디 생성
+                                final customId = await provider
+                                    .getNextCustomId(widget.selectedDay);
 
-                            // 텍스트 필드를 초기화하여 새로운 메모를 입력하기 위해 준비
-                            _textController.clear();
+                                if (title.isNotEmpty) {
+                                  final newTodo = Todo(
+                                    id: customId,
+                                    goalId: "0000000000",
+                                    title: title,
+                                    gemstone: 'core',
+                                    goalTitle: '없음',
+                                    repeat: '반복 안함',
+                                    repeatCode: "0",
+                                    repeatGroupId: null,
+                                    status: false,
+                                    isCompleted: false,
+                                    isContinue: false,
+                                    date: widget.selectedDay,
+                                  );
+                                  provider.addTodo(newTodo);
 
-                            // 화면을 다시 그리도록 setState 호출하여 메모 목록을 갱신
-                            setState(() {
-                              // todos = dbHelper.getTodos();
-                            });
-                          }
+                                  // 텍스트 필드를 초기화하여 새로운 메모를 입력하기 위해 준비
+                                  _textController.clear();
 
-                          FocusScope.of(context).unfocus();
-                        }
-                      },
+                                  _focusNode.unfocus();
+                                  // FocusScope.of(context).unfocus();
+
+                                  // 화면을 다시 그리도록 setState 호출하여 메모 목록을 갱신
+                                  setState(() {
+                                    // todos = dbHelper.getTodos();
+                                  });
+                                }
+                              }
+                            }
+                          : null,
                       style: ButtonStyle(
                         backgroundColor: WidgetStatePropertyAll(
                           _hasText ? Color(0xFF0066FA) : Color(0xFF94BEFF),
@@ -155,8 +193,17 @@ class _AddTodolistWidgetState extends State<AddTodolistWidget> {
                       ),
                     )
                   : IconButton(
+                      key: _iconButtonKey,
                       padding: EdgeInsets.all(12),
-                      onPressed: () => context.beamToNamed('addTodo'),
+                      onPressed: () {
+                        // _focusNode.unfocus();
+                        context.push(
+                          '/addTodo',
+                          extra: {
+                            'selectedDay': widget.selectedDay.toIso8601String()
+                          },
+                        );
+                      },
                       style: ButtonStyle(
                         backgroundColor: WidgetStatePropertyAll(
                           Color(0xFF0066FA),

@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:mogrow/database/database.dart';
+import 'package:mogrow/providers/todo_list.dart';
 import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class HomeCalendarWidget extends StatefulWidget {
   final Function(DateTime) onPageChanged;
   final Function(DateTime) onDateSelected;
-  // final Map<DateTime, bool> markedDates;
 
   const HomeCalendarWidget({
     required this.onPageChanged,
@@ -19,73 +18,53 @@ class HomeCalendarWidget extends StatefulWidget {
 }
 
 class _HomeCalendarState extends State<HomeCalendarWidget> {
-  CalendarFormat _calendarFormat = CalendarFormat.week;
-  DateTime _focusedDay = DateTime.now();
-  DateTime? _selectedDay;
-
-  // 해당 날짜에 데이터가 있는지
-  Map<DateTime, bool> dateHasDataMap = {};
+  // CalendarFormat _calendarFormat = CalendarFormat.week;
+  // DateTime _focusedDay = DateTime.now();
+  // DateTime? _selectedDay;
 
   @override
   void initState() {
     super.initState();
 
     // 초기 화면 오늘 날짜로 선택
-    DateTime today = DateTime.now();
-    _selectedDay = DateTime(today.year, today.month, today.day);
-    _focusedDay = _selectedDay!;
+    // DateTime today = DateTime.now();
+    // _selectedDay = DateTime(today.year, today.month, today.day);
+    // _focusedDay = _selectedDay!;
   }
 
-  late Database database;
-  late List<Todo> _todosFuture;
-  @override
-  void didChangeDependencies() async {
-    super.didChangeDependencies();
-    database = Provider.of<Database>(context);
-    _todosFuture = await database.todoDao.getAllTodos();
+  int _getRowCount(DateTime focusedDay) {
+    // 해당 월의 첫 날과 마지막 날을 구합니다.
+    final firstDayOfMonth = DateTime(focusedDay.year, focusedDay.month, 1);
+    final lastDayOfMonth = DateTime(focusedDay.year, focusedDay.month + 1, 0);
 
-    final groupedTodoList = groupTodosByDate(_todosFuture);
+    // 첫 주 시작 요일과 마지막 주 끝 요일을 포함해 총 며칠이 필요한지 계산합니다.
+    // TableCalendar의 기본 설정(일요일 시작) 기준입니다.
+    final daysBefore = firstDayOfMonth.weekday % 7;
+    final totalDays = daysBefore + lastDayOfMonth.day;
 
-    setState(() {
-      dateHasDataMap = {
-        for (var date in groupedTodoList.keys)
-          date: _hasData(date, groupedTodoList)
-      };
-    });
-  }
-
-  // 해당 날짜에 todoList 가 있는지
-  bool _hasData(DateTime date, Map<DateTime, List<Todo>> groupedTodoList) {
-    return groupedTodoList[date]?.isNotEmpty ??
-        false; // 데이터가 있으면 true, 없으면 false
-  }
-
-  // Todo 목록을 DateTime에 따라 그룹화
-  Map<DateTime, List<Todo>> groupTodosByDate(List<Todo> todos) {
-    Map<DateTime, List<Todo>> groupedTodos = {};
-
-    for (var todo in todos) {
-      if (!groupedTodos.containsKey(todo.date)) {
-        groupedTodos[todo.date!] = [];
-      }
-      groupedTodos[todo.date]!.add(todo);
-    }
-
-    return groupedTodos;
+    // 7로 나누어 올림하면 해당 월의 주차(행 수)가 나옵니다.
+    return (totalDays / 7).ceil();
   }
 
   @override
   Widget build(BuildContext context) {
+    final provider = Provider.of<TodoListProvider>(context);
+    final selectedDay = provider.selectedDay;
+    final focusedDay = provider.focusedDay;
+    final calendarFormat = provider.calendarFormat;
+
     return LayoutBuilder(builder: (context, constraints) {
       return Stack(
         children: [
           AnimatedContainer(
             duration: const Duration(milliseconds: 200),
             color: Color(0xFFFFFFFF),
-            height: _calendarFormat == CalendarFormat.month ? 370.0 : 120.0,
+            height: calendarFormat == CalendarFormat.month
+                ? (_getRowCount(focusedDay) * 52.0) + 54.0
+                : 108.0,
             child: TableCalendar(
-              firstDay: DateTime.utc(2010, 10, 16),
-              lastDay: DateTime.utc(2030, 3, 14),
+              firstDay: DateTime.now().subtract(Duration(days: 365 * 50)),
+              lastDay: DateTime.now().add(Duration(days: 365 * 50)),
               headerStyle: HeaderStyle(
                 formatButtonVisible: false,
                 leftChevronVisible: false,
@@ -93,9 +72,11 @@ class _HomeCalendarState extends State<HomeCalendarWidget> {
                 titleTextStyle: TextStyle(
                   inherit: false,
                 ),
-                headerPadding: EdgeInsets.only(top: 0),
+                headerPadding: EdgeInsets.only(
+                  bottom: 6,
+                ),
               ),
-              // headerVisible: false,
+              headerVisible: false,
               calendarStyle: CalendarStyle(
                 defaultTextStyle: TextStyle(
                   fontSize: 16,
@@ -129,27 +110,31 @@ class _HomeCalendarState extends State<HomeCalendarWidget> {
                 //   shape: BoxShape.circle,
                 // ),
               ),
-              focusedDay: _focusedDay,
-              calendarFormat: _calendarFormat,
+              focusedDay: focusedDay,
+              calendarFormat: calendarFormat,
               selectedDayPredicate: (day) {
-                return isSameDay(_selectedDay, day);
+                return isSameDay(selectedDay, day);
               },
               onDaySelected: (selectedDay, focusedDay) {
-                setState(() {
-                  _selectedDay = selectedDay;
-                  _focusedDay = focusedDay;
-                });
-                widget.onDateSelected(selectedDay);
+                context.read<TodoListProvider>().setSeletedDay(DateTime(
+                    selectedDay.year, selectedDay.month, selectedDay.day));
+
+                // widget.onDateSelected(selectedDay);
+                context
+                    .read<TodoListProvider>()
+                    .setCalendarFormat(CalendarFormat.week);
               },
               onFormatChanged: (format) {
-                if (_calendarFormat != format) {
-                  setState(() {
-                    _calendarFormat = format;
-                  });
+                if (calendarFormat != format) {
+                  context.read<TodoListProvider>().setCalendarFormat(format);
+                  // setState(() {
+                  //   _calendarFormat = format;
+                  // });
                 }
               },
               onPageChanged: (focusedDay) {
-                _focusedDay = focusedDay;
+                context.read<TodoListProvider>().setFocusedDay(DateTime(
+                    focusedDay.year, focusedDay.month, focusedDay.day));
                 widget.onPageChanged(focusedDay); // 페이지 변경 시 상위 위젯에 알림
               },
               locale: 'ko_KR',
@@ -166,9 +151,10 @@ class _HomeCalendarState extends State<HomeCalendarWidget> {
                   color: Color(0xFF667086),
                 ),
               ),
+              daysOfWeekHeight: 25,
               calendarBuilders: CalendarBuilders(
                 markerBuilder: (context, date, events) {
-                  if (dateHasDataMap[
+                  if (provider.dateHasDataMap[
                           DateTime(date.year, date.month, date.day)] ==
                       true) {
                     return Opacity(
@@ -219,10 +205,16 @@ class _HomeCalendarState extends State<HomeCalendarWidget> {
                   //   _height = _weekHeight;
                   //   _calendarFormat = CalendarFormat.week;
                   // }
-                  if (_calendarFormat == CalendarFormat.month) {
-                    _calendarFormat = CalendarFormat.week;
+                  if (calendarFormat == CalendarFormat.month) {
+                    context
+                        .read<TodoListProvider>()
+                        .setCalendarFormat(CalendarFormat.week);
+                    // _calendarFormat = CalendarFormat.week;
                   } else {
-                    _calendarFormat = CalendarFormat.month;
+                    context
+                        .read<TodoListProvider>()
+                        .setCalendarFormat(CalendarFormat.month);
+                    // _calendarFormat = CalendarFormat.month;
                   }
                 });
               },
@@ -237,24 +229,67 @@ class _HomeCalendarState extends State<HomeCalendarWidget> {
                       width: 1,
                     ),
                   ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.1),
-                      spreadRadius: 0,
-                      blurRadius: 6,
-                      offset: Offset(0, 8),
-                    ),
-                  ],
+                  boxShadow: calendarFormat == CalendarFormat.month
+                      ? [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.1),
+                            spreadRadius: 0,
+                            blurRadius: 6,
+                            offset: Offset(0, 8),
+                          ),
+                        ]
+                      : null,
                 ),
-                child: Center(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Color(0xFFBEC4CE),
-                      borderRadius: BorderRadius.circular(4),
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Center(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Color(0xFFBEC4CE),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        width: 40,
+                        height: 4,
+                      ),
                     ),
-                    width: 40,
-                    height: 4,
-                  ),
+                    calendarFormat == CalendarFormat.month
+                        ? Align(
+                            alignment: Alignment.centerRight,
+                            child: TextButton(
+                              style: TextButton.styleFrom(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 14,
+                                  vertical: 6,
+                                ),
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                minimumSize: Size.zero,
+                                overlayColor: Colors.transparent,
+                              ),
+                              onPressed: () {
+                                final now = DateTime.now();
+                                context.read<TodoListProvider>().setSeletedDay(
+                                    DateTime(now.year, now.month, now.day));
+
+                                widget.onDateSelected(DateTime.now());
+                                widget.onPageChanged(DateTime.now());
+                                setState(() {
+                                  // _focusedDay = DateTime.now();
+                                  // _selectedDay = DateTime.now();
+                                });
+                              },
+                              child: Text(
+                                '오늘',
+                                style: TextStyle(
+                                  color: Color(0xFF0066FA),
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          )
+                        : SizedBox.shrink(),
+                  ],
                 ),
               ),
             ),

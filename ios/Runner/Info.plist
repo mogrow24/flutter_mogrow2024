@@ -45,5 +45,19 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>사진을 업로드 하려면 사진첩 접근 권한이 필요합니다.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>카메라에 접근 권한이 필요합니다.</string>
+
+	<key>NSUserNotificationsUsageDescription</key>
+    <string>할 일과 프로젝트 알림을 보내기 위해 알림 권한이 필요합니다.</string>
+    
+    <!-- ✅ 백그라운드 모드 활성화 -->
+    <key>UIBackgroundModes</key>
+    <array>
+        <string>fetch</string>
+        <string>remote-notification</string>
+    </array>
 </dict>
 </plist>
