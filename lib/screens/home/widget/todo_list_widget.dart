@@ -61,7 +61,7 @@ class _TodoListWidgetState extends State<TodoListWidget> {
               );
 
               if (deleteType == 'repeatSelect') {
-                todoProvider.deleteRepeatSelect(todoItem, widget.selectedDay);
+                // todoProvider.deleteRepeatSelect(todoItem, widget.selectedDay);
                 return false;
               } else if (deleteType == 'repeatAll') {
                 todoProvider.deleteRepeatAll(todoItem, widget.selectedDay);

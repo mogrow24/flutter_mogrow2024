@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mogrow/database/database.dart';
 import 'package:mogrow/screens/home/components/show_modal_new_goal.dart';
 
 class ShowModalAddGoal extends StatefulWidget {
@@ -9,16 +10,6 @@ class ShowModalAddGoal extends StatefulWidget {
 }
 
 class _ShowModalAddGoalState extends State<ShowModalAddGoal> {
-  // void _showSelectGoalModal() {
-  //   Navigator.of(context).pop();
-  //   showModalBottomSheet(
-  //     context: context,
-  //     builder: (BuildContext context) {
-  //       return ShowModal();
-  //     },
-  //   );
-  // }
-
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -46,7 +37,6 @@ class _ShowModalAddGoalState extends State<ShowModalAddGoal> {
                   color: Color(0xFFBEC4CE),
                   borderRadius: const BorderRadius.all(Radius.circular(4)),
                 ),
-                // child: ,
               ),
               SizedBox(
                 height: 10,
@@ -73,9 +63,19 @@ class _ShowModalAddGoalState extends State<ShowModalAddGoal> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   ElevatedButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                      Navigator.of(context).push(_FullScreenPageRoute());
+                    // onPressed: () {
+                    //   Navigator.pop(context);
+                    //   Navigator.of(context).push(_FullScreenPageRoute());
+                    // },
+                    onPressed: () async {
+                      final result = await Navigator.of(context)
+                          .push<Goal>(_FullScreenPageRoute());
+                      if (!context.mounted) return;
+                      if (result != null) {
+                        Navigator.pop(context, result);
+                      } else {
+                        Navigator.pop(context);
+                      }
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Color(0xFF0066FA),
@@ -128,7 +128,7 @@ class _ShowModalAddGoalState extends State<ShowModalAddGoal> {
   }
 }
 
-class _FullScreenPageRoute extends PageRouteBuilder {
+class _FullScreenPageRoute extends PageRouteBuilder<Goal> {
   _FullScreenPageRoute()
       : super(
           pageBuilder: (context, animation, secondaryAnimation) {

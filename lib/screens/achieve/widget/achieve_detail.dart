@@ -321,7 +321,15 @@ class _AchieveDetailState extends State<AchieveDetail> {
                   // 수정하기
                   Navigator.of(context).push(_FullScreenPageRoute(goal));
                 } else if (value == 'D') {
-                  // 삭제하기
+                  // 삭제하기 (기타 목표는 삭제 불가)
+                  final idToDelete =
+                      goalId is String ? goalId : goalId?.toString();
+                  if (idToDelete == null ||
+                      idToDelete.isEmpty ||
+                      idToDelete == '0000000000') {
+                    return;
+                  }
+
                   final currentContext = context;
 
                   String? deleteType = await showDialog(
@@ -331,19 +339,26 @@ class _AchieveDetailState extends State<AchieveDetail> {
 
                   if (mounted) {
                     if (deleteType == 'delete') {
-                      await currentContext
-                          .read<GoalListProvider>()
-                          .deleteGoals(goalId);
+                      try {
+                        await currentContext
+                            .read<GoalListProvider>()
+                            .deleteGoals(idToDelete);
 
-                      // 삭제 후 할일, 기록 다시 호출
-                      await currentContext
-                          .read<TodoListProvider>()
-                          .fetchTodos();
-                      await currentContext
-                          .read<RecordListProvider>()
-                          .fetchRecords();
+                        // 삭제 후 할일, 기록 다시 호출
+                        await currentContext
+                            .read<TodoListProvider>()
+                            .fetchTodos();
+                        await currentContext
+                            .read<RecordListProvider>()
+                            .fetchRecords();
 
-                      currentContext.pop();
+                        if (currentContext.mounted) {
+                          currentContext.pop();
+                        }
+                      } catch (e, stack) {
+                        debugPrint('목표 삭제 실패: $e');
+                        debugPrint('$stack');
+                      }
                     }
                   }
                 } else if (value == 'C') {

@@ -587,17 +587,87 @@ class TodoListProvider extends ChangeNotifier {
     // await Future.delayed(Duration(milliseconds: 400));
   }
 
-  Future<void> updateTodoTomorrow(String id, DateTime currentDate) async {
+  /// 반복 일정인 경우: 해당 날만 미루기(제외 + 내일 행 추가).
+  /// 개별 행(완료/진행중으로 만든 행)이면 그 행만 날짜 변경.
+  Future<void> updateTodoTomorrow(Todo todo, DateTime currentDate) async {
     final tomorrowDate = currentDate.add(Duration(days: 1));
+    final id = todo.id;
 
-    final updateTodo = TodosCompanion(
-      date: Value(tomorrowDate),
-      updateDate: Value(DateTime.now()),
-    );
+    /* 기존 코드 주석 처리 */
+    // final updateTodo = TodosCompanion(
+    //   date: Value(tomorrowDate),
+    //   updateDate: Value(DateTime.now()),
+    // );
+    // await database.todoDao.updateTodoById(id, updateTodo);
 
-    await database.todoDao.updateTodoById(id, updateTodo);
+    /* 2026.02.11 반복 일절에 대한 코드 개선 */
+    // 반복 없음 -> 해당 행만 내일로
+
+    if (todo.repeatGroupId == null) {
+      await database.todoDao.updateTodoById(
+        id,
+        TodosCompanion(
+          date: Value(tomorrowDate),
+          updateDate: Value(DateTime.now()),
+        ),
+      );
+      await fetchTodos();
+      return;
+    }
+
+    // 반복 일정: 이 행이 "개별 저장된 행"(instance)인지 확인
+    // instance = repeatEndDate가 있어서 이 날짜 하나만 나타나는 행
+    final isInstanceRow = todo.repeatEndDate != null &&
+        _isSameDay(
+            todo.repeatEndDate!, currentDate.add(const Duration(days: 1)));
+
+    if (isInstanceRow) {
+      // 개별 행만 내일로 이동
+      await database.todoDao.updateTodoById(
+        id,
+        TodosCompanion(
+          date: Value(tomorrowDate),
+          repeatEndDate: Value(tomorrowDate.add(const Duration(days: 1))),
+          updateDate: Value(DateTime.now()),
+        ),
+      );
+    } else {
+      // 시드(템플릿) 쪽에서 나온 occurrence → 해당 날만 미루기
+      // 1) 이 날짜는 반복에서 제외
+      await database.repeatExcludeDao.insertRepeatExclude(
+        RepeatExcludesCompanion(
+          todoId: Value(id),
+          repeatGroupId: Value(todo.repeatGroupId!),
+          excludedDate: Value(currentDate),
+        ),
+      );
+      // 2) 내일 날짜로 새 행 한 건만 추가 (repeatEndDate로 하루만 표시)
+      final customId = await database.todoDao.getNextCustomId(tomorrowDate);
+      await database.todoDao.insertTodo(
+        TodosCompanion(
+          id: Value(customId),
+          goalId: Value(todo.goalId),
+          title: Value(todo.title),
+          goalTitle: Value(todo.goalTitle),
+          gemstone: Value(todo.gemstone),
+          repeat: Value(todo.repeat),
+          repeatCode: Value(todo.repeatCode),
+          repeatStartDate: Value(tomorrowDate),
+          repeatEndDate: Value(tomorrowDate.add(const Duration(days: 1))),
+          repeatGroupId: Value(todo.repeatGroupId),
+          status: Value(false),
+          isCompleted: Value(false),
+          isContinue: Value(false),
+          date: Value(tomorrowDate),
+        ),
+      );
+    }
 
     await fetchTodos();
+  }
+
+  static bool _isSameDay(DateTime a, DateTime b) {
+    return a.year == b.year && a.month == b.month && a.day == b.day;
   }
 
   // 할일 완료 시 -> 데이터 추가, 반복 그룹,
@@ -728,8 +798,9 @@ class TodoListProvider extends ChangeNotifier {
   }
 
   // 취소 버튼 시
+  /* 2026.02.11 반복 일정 관련 코드 개선 */
   Future<void> cancelTodo(Todo todo, DateTime selectedDay) async {
-    // 반복없음 + 반복 그룹 없음일 때 그냥 업데이트
+    // 반복없음 + 반복 그룹 없음일 때: 상태만 초기화
     if (todo.repeatCode == "0" && todo.repeatGroupId == null) {
       await database.todoDao.updateTodoById(
           todo.id,
@@ -739,18 +810,19 @@ class TodoListProvider extends ChangeNotifier {
             status: Value(false),
             updateDate: Value(DateTime.now()),
           ));
-    } else {
-      // 반복설정된 할일일 때
-      // 1. 해당 날짜 할일 삭제
-      // 2. 제외테이블에 있는 해당 날짜 삭제
-
-      // 해당 날짜의 할일 삭제
-      await database.todoDao.deleteTodo(todo.id);
-
-      // 제외 테이블에 있는 할일의 해당 날짜만 삭제
-      await database.repeatExcludeDao
-          .deleteRepeatExcludeByDate(todo.repeatGroupId!, selectedDay);
+      await fetchTodos();
+      return;
     }
+
+    // 반복 일정이어도(개별 행이든 시드든) 취소 = 완료/진행중 상태만 false로 되돌림
+    await database.todoDao.updateTodoById(
+        todo.id,
+        TodosCompanion(
+          isCompleted: Value(false),
+          isContinue: Value(false),
+          status: Value(false),
+          updateDate: Value(DateTime.now()),
+        ));
 
     await fetchTodos();
   }
@@ -825,6 +897,11 @@ class TodoListProvider extends ChangeNotifier {
   }
 
   // 반복 일정 삭제(해당 할일)
+  /*
+  선택 된 반복 일정 삭제
+  2026.02.11 해당 기능 사용 안함 (삭제 시 모든 반복 일정 삭제)
+   */
+  /*
   Future<void> deleteRepeatSelect(Todo todo, DateTime selectedDay) async {
     // excludes table insert
     final insertRepeatExclude = RepeatExcludesCompanion(
@@ -836,6 +913,7 @@ class TodoListProvider extends ChangeNotifier {
 
     await fetchTodos();
   }
+  */
 
   // 반복 일정 삭제(이후 모든 할일)
   Future<void> deleteRepeatAll(Todo todo, DateTime selectedDay) async {

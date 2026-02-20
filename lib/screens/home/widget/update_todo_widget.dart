@@ -480,8 +480,7 @@ class _UpdateTodoWidgetState extends State<UpdateTodoWidget> {
                                     //     await showDeleteModal(_todo);
 
                                     if (deleteType == 'repeatSelect') {
-                                      provider.deleteRepeatSelect(
-                                          _todo, _selectedDay);
+                                      // provider.deleteRepeatSelect(_todo, _selectedDay);
                                     } else if (deleteType == 'repeatAll') {
                                       provider.deleteRepeatAll(
                                           _todo, _selectedDay);

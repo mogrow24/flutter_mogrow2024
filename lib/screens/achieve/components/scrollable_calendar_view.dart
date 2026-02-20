@@ -24,7 +24,8 @@ class ScrollableCalendarView extends StatefulWidget {
 class _ScrollableCalendarViewState extends State<ScrollableCalendarView> {
   final ScrollController _scrollController = ScrollController();
   final int _loadCount = 3;
-  final double _calendarHeight = 330;
+  // final double _calendarHeight = 330;
+  static const double _itemPaddingVertical = 16;
 
   final List<DateTime> _monthList = [];
   // final bool _isLoading = false;
@@ -59,6 +60,7 @@ class _ScrollableCalendarViewState extends State<ScrollableCalendarView> {
     _todayIndex = 3;
 
     _scrollController.addListener(() {
+      if (!_scrollController.hasClients) return;
       if (_scrollController.position.pixels <= 0 &&
           _scrollController.position.userScrollDirection ==
               ScrollDirection.forward) {
@@ -70,7 +72,13 @@ class _ScrollableCalendarViewState extends State<ScrollableCalendarView> {
     });
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final targetOffset = _todayIndex * _calendarHeight;
+      // final targetOffset = _todayIndex * _calendarHeight;
+      if (!_scrollController.hasClients) return;
+      double targetOffset = 0;
+      for (int i = 0; i < _todayIndex && i < _monthList.length; i++) {
+        targetOffset += getCalendarHeight(getWeekCount(_monthList[i])) +
+            _itemPaddingVertical;
+      }
       _scrollController.jumpTo(targetOffset);
     });
   }
@@ -86,17 +94,26 @@ class _ScrollableCalendarViewState extends State<ScrollableCalendarView> {
       newMonths.add(DateTime(first.year, first.month - i));
     }
 
-    await Future.delayed(Duration(milliseconds: 300));
+    // await Future.delayed(Duration(milliseconds: 300));
+    // prepend할 달들의 실제 높이 합으로 스크롤 보정 (월별 주 수가 달라서 고정값 사용 시 화면이 어긋남)
+    double prependedHeight = 0;
+    for (final m in newMonths) {
+      prependedHeight +=
+          getCalendarHeight(getWeekCount(m)) + _itemPaddingVertical;
+    }
 
     setState(() {
       _monthList.insertAll(0, newMonths);
       _todayIndex += _loadCount;
+      _isLoadingTop = false;
     });
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _scrollController.position.hold(() {}); // 스크롤 관성 멈춤
-      _scrollController.jumpTo(oldScrollOffset + _calendarHeight * _loadCount);
-      setState(() => _isLoadingTop = false);
+      // _scrollController.position.hold(() {}); // 스크롤 관성 멈춤
+      // _scrollController.jumpTo(oldScrollOffset + _calendarHeight * _loadCount);
+      // setState(() => _isLoadingTop = false);
+      if (!_scrollController.hasClients) return;
+      _scrollController.jumpTo(oldScrollOffset + prependedHeight);
     });
   }
 

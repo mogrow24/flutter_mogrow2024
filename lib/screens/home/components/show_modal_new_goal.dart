@@ -378,10 +378,12 @@ class _ShowModalNewGoalState extends State<ShowModalNewGoal> {
     setState(() {
       checkTitle = _controllerTitle.text.isEmpty ? false : true;
 
-      checkSubtitle = _controllerSubtitle.text.isEmpty ? false : true;
+      // checkSubtitle = _controllerSubtitle.text.isEmpty ? false : true;
+      checkSubtitle = true;
     });
 
-    return checkTitle != false && checkSubtitle != false;
+    // return checkTitle != false && checkSubtitle != false;
+    return checkTitle == true;
   }
 
   // 날짜수, 디데이 토글
@@ -467,42 +469,38 @@ class _ShowModalNewGoalState extends State<ShowModalNewGoal> {
           actions: [
             TextButton(
               onPressed: () async {
-                if (_characterCountTitle > 0) {
-                  Navigator.of(context).pop();
+                final title = _controllerTitle.text.trim();
+                if (title.isEmpty) return;
 
-                  String title = _controllerTitle.text;
-                  String subTitle = _controllerSubtitle.text;
-
-                  String dateDiv = "1";
-                  if (isSelected[1]) {
-                    dateDiv = "2";
-                  }
-
-                  DateTime startDate = DateTime(_startCalendarDate.year,
-                      _startCalendarDate.month, _startCalendarDate.day);
-                  DateTime endDate = DateTime(_endCalendarDate.year,
-                      _endCalendarDate.month, _endCalendarDate.day);
-
-                  // 아이디 생성
-                  final customId = await provider.getNextCustomId();
-
-                  if (title.isNotEmpty && subTitle.isNotEmpty) {
-                    final newGoal = Goal(
-                      goalId: customId,
-                      title: title,
-                      subTitle: subTitle,
-                      gemstone: selectedImage,
-                      dateDiv: dateDiv,
-                      startDate: startDate,
-                      endDate: dateDiv == "1" ? null : endDate,
-                      desc: desc,
-                      isCompleted: false,
-                      status: false,
-                      selectedMood: null,
-                    );
-                    provider.addGoal(newGoal);
-                  }
+                String dateDiv = "1";
+                if (isSelected[1]) {
+                  dateDiv = "2";
                 }
+
+                DateTime startDate = DateTime(_startCalendarDate.year,
+                    _startCalendarDate.month, _startCalendarDate.day);
+                DateTime endDate = DateTime(_endCalendarDate.year,
+                    _endCalendarDate.month, _endCalendarDate.day);
+
+                // 아이디 생성
+                final customId = await provider.getNextCustomId();
+                final subTitleTrim = _controllerSubtitle.text.trim();
+                final newGoal = Goal(
+                  goalId: customId,
+                  title: title,
+                  subTitle: subTitleTrim.isEmpty ? null : subTitleTrim,
+                  gemstone: selectedImage,
+                  dateDiv: dateDiv,
+                  startDate: startDate,
+                  endDate: dateDiv == "1" ? null : endDate,
+                  desc: desc,
+                  isCompleted: false,
+                  status: false,
+                  selectedMood: null,
+                );
+                await provider.addGoal(newGoal);
+                if (!context.mounted) return;
+                Navigator.of(context).pop(newGoal);
               },
               style: ButtonStyle(
                 overlayColor: WidgetStateProperty.all(Colors.white),

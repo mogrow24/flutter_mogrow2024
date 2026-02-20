@@ -121,14 +121,27 @@ class _ShowModalSelectGoalState extends State<ShowModalSelectGoal> {
                     child: TextButton(
                       // style:
                       //     ButtonStyle(overlayColor: WidgetStateColor.transparent),
-                      onPressed: () {
-                        Navigator.pop(context);
-                        showModalBottomSheet(
+                      onPressed: () async {
+                        final result = await showModalBottomSheet<Goal>(
                           context: context,
                           builder: (BuildContext context) {
                             return ShowModalAddGoal();
                           },
                         );
+                        if (result != null && mounted) {
+                          final goalProvider = Provider.of<GoalListProvider>(
+                              context,
+                              listen: false);
+                          await goalProvider.fetchGoals();
+                          setState(() {
+                            _goalList = goalProvider.goalList;
+                          });
+                          if (!mounted) return;
+                          Navigator.pop(context, {
+                            'goal': result,
+                            'selectedId': result.goalId,
+                          });
+                        }
                       },
                       child: Text(
                         '새로 만들기',

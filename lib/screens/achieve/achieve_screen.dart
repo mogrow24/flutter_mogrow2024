@@ -660,7 +660,7 @@ class _AchieveScreenState extends State<AchieveScreen> {
 
                                           if (goalItem.dateDiv == "1") {
                                             dDay = goalItem.startDate != null
-                                                ? 'D+${-goalItem.startDate!.difference(DateTime.now()).inDays}'
+                                                ? 'D+${-goalItem.startDate!.difference(DateTime.now()).inDays + 1}'
                                                 : '';
                                           } else {
                                             dDay = goalItem.startDate != null

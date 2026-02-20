@@ -38,13 +38,13 @@ class _ShowModalSelectRepeatState extends State<ShowModalSelectRepeat> {
       case 4:
         return '${strToday.split('(')[1].substring(0, 1)}요일';
       case 5:
-        return strToday.substring(3, 7);
+        return strToday.split(' ')[1];
       case 6:
         return '넷째 주 ${strToday.split('(')[1].substring(0, 1)}요일';
       case 7:
         return '마지막 주 ${strToday.split('(')[1].substring(0, 1)}요일';
       case 8:
-        return strToday.substring(0, 7);
+        return '${strToday.split(' ')[0]} ${strToday.split(' ')[1]}';
       default:
         return null; // 나머지 인덱스는 추가 텍스트 없음
     }

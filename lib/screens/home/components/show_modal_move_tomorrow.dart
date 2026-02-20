@@ -61,7 +61,7 @@ class ShowModalMoveTomorrow extends StatelessWidget {
                     ),
                     TextButton(
                       onPressed: () {
-                        provider.updateTodoTomorrow(todo.id, todo.date!);
+                        provider.updateTodoTomorrow(todo, todo.date!);
 
                         Navigator.of(context).pop();
                       },
